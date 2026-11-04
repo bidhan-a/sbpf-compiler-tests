@@ -53,18 +53,7 @@ impl Compiler {
     }
 
     pub(crate) fn version(self, binary: &Path) -> Result<Vec<(String, String)>, Box<dyn Error>> {
-        match self {
-            Self::CargoBuildSbpf => {
-                let mut versions = run_version_command(binary, &[self.subcommand(), "--version"])?;
-                versions.extend(run_version_command(
-                    Path::new("sbpf-linker"),
-                    &["--version"],
-                )?);
-                versions.extend(run_version_command(Path::new("rustc"), &["--version"])?);
-                Ok(versions)
-            }
-            Self::CargoBuildSbf => run_version_command(binary, &[self.subcommand(), "--version"]),
-        }
+        run_version_command(binary, &[self.subcommand(), "--version"])
     }
 }
 
@@ -81,7 +70,6 @@ fn run_version_command(
     Ok(stdout
         .lines()
         .filter(|line| !line.trim().is_empty())
-        .take(2)
         .map(|line| match line.split_once(' ') {
             Some((label, version)) => (label.to_owned(), version.to_owned()),
             None => (line.to_owned(), String::new()),
