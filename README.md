@@ -69,6 +69,8 @@ baseline compute units. A program with tests only can omit the `benchmarks` fiel
 Programs without a benchmark module are only built and tested and are not included in the final benchmark report.
 
 Baselines in `programs/manifest.json` are generated with the release `cargo-build-sbpf` and `sbpf-linker`.
+The exact toolchain versions that generated them are recorded in the `toolchain` section of the manifest.
+Whenever baselines are added or updated, this section must be manually updated to reflect the toolchain versions used.
 
 ### Note:
 

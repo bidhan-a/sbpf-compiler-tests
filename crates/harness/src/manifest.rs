@@ -9,12 +9,21 @@ use serde::Deserialize;
 
 use crate::{cargo, command_error, invalid_data, validate_name};
 
-const SCHEMA_VERSION: u32 = 1;
+const SCHEMA_VERSION: u32 = 2;
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub(crate) struct Toolchain {
+    cargo_build_sbpf: String,
+    sbpf_linker: String,
+    rustc: String,
+}
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct Manifest {
     schema_version: u32,
+    toolchain: Toolchain,
     pub(crate) programs: Vec<ExpectedProgram>,
 }
 
@@ -119,6 +128,13 @@ pub(crate) fn validate(
     manifest: &Manifest,
     packages: &BTreeMap<String, ProgramPackage>,
 ) -> Result<(), Box<dyn Error>> {
+    let toolchain = &manifest.toolchain;
+    if toolchain.cargo_build_sbpf.trim().is_empty()
+        || toolchain.sbpf_linker.trim().is_empty()
+        || toolchain.rustc.trim().is_empty()
+    {
+        return Err(invalid_data("manifest toolchain record is incorrect"));
+    }
     if manifest.programs.is_empty() {
         return Err(invalid_data("manifest contains no programs"));
     }
